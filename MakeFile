@@ -25,6 +25,6 @@ run: kernel.elf
 	qemu-system-x86_64 -kernel kernel.elf -serial mon:stdio
 
 clean:
-	del /Q $(subst /,\,$(OBJS)) kernel.elf 2>nul || true
+	rm -f $(OBJS) kernel.elf
 
 .PHONY: all run clean
