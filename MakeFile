@@ -1,0 +1,30 @@
+# DSG OS - x86_64 Makefile for Windows
+
+CC       := clang
+LD       := ld.lld
+CFLAGS   := --target=x86_64-elf -ffreestanding -fno-stack-protector -nostdlib -nostartfiles -mno-red-zone -O2 -g -Wall -Wextra -I.
+LDFLAGS  := -T linker.ld -nostdlib
+
+# Автоматически собираем все .c и .S файлы
+CSRCS    := $(wildcard kernel/*.c drivers/*.c gui/*.c network/*.c browser/*.c)
+SSRCS    := $(wildcard boot/*.S)
+OBJS     := $(CSRCS:.c=.o) $(SSRCS:.S=.o)
+
+all: kernel.elf
+
+kernel.elf: $(OBJS) linker.ld
+	$(LD) $(LDFLAGS) -o $@ $(OBJS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+%.o: %.S
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+run: kernel.elf
+	qemu-system-x86_64 -kernel kernel.elf -serial mon:stdio
+
+clean:
+	del /Q $(subst /,\,$(OBJS)) kernel.elf 2>nul || true
+
+.PHONY: all run clean
